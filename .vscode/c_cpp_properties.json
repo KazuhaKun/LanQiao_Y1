@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Keil",
+            "includePath": [
+                "${default}",
+                "${workspaceFolder}/**",
+                "C:/Keil_v5/C51/INC/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ]
+        }
+    ],
+    "version": 4
+}
+

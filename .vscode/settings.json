@@ -1,0 +1,16 @@
+{
+    "cSpell.words": [
+        "DCLK",
+        "SCLK",
+        "TLSB",
+        "TMSB",
+        "VBAT"
+    ],
+    "C_Cpp.errorSquiggles": "disabled",
+    "files.associations": {
+        "*.h": "c",
+        "REG52.H": "c",
+        "HC138.C": "cpp"
+    },
+    "C_Cpp.default.compilerPath": ""
+}
