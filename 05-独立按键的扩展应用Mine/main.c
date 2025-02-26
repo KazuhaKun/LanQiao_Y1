@@ -12,6 +12,9 @@ sbit L4 = P0^3;
 sbit L5 = P0^4;
 sbit L6 = P0^5;
 
+
+unsigned char mode;
+
 void Delay(unsigned int t)
 {
     while(t--);
@@ -31,72 +34,68 @@ void OutPutP0(unsigned char channel,unsigned char dat)
 
 void InitSystem()
 {
-    OutPutP0(5,0x00);
+    OutPutP0(5,0x00);   // Disable Buzzer
 }
 
-void LED_Show(unsigned char mode,unsigned char dat)
-{
-    unsigned char Num;
-    switch (mode)
-    {
-        case 1:
-            OutPutP0(4,dat);
-            break;
+// void LED_Show(unsigned char mode,unsigned char dat)
+// {
+//     unsigned char Num;
+//     switch (mode)
+//     {
+//         case 1:
+//             OutPutP0(4,dat);
+//             break;
         
-        case 2:
-            if (dat < 9)
-            {
-                Num = ~(0x01 << (dat-1));
-                OutPutP0(4,Num);
-            }
-            break;
-    }
-}
-
-unsigned char KeyNum()
-{
-    unsigned char KeyNum = 0;
-    if (S7 == 0){while(S7 == 0);KeyNum = 7;}
-    if (S6 == 0){while(S6 == 0);KeyNum = 6;}
-    if (S5 == 0){while(S5 == 0);KeyNum = 5;}
-    if (S4 == 0){while(S4 == 0);KeyNum = 4;}
-
-    return KeyNum;
-}
-
+//         case 2:
+//             if (dat < 9)
+//             {
+//                 Num = ~(0x01 << (dat-1));
+//                 OutPutP0(4,Num);
+//             }
+//             break;
+//     }
+// }
 
 void LED_Ctrl()
 {
-    unsigned char mode = 0;
-    if(KeyNum() == 7 && mode == 0) mode = 1;
-    if(KeyNum() == 6 && mode == 0) mode = 2;
 
-    switch (mode)
+    if(S7 == 0) 
     {
-        case 0:
-            LED_Show(1,0xff);
-            break;
-        case 1:
-            LED_Show(2,1);
-            if(KeyNum() == 5) L3 = !L3;
-            
-            if(KeyNum() == 4) L4 = !L4;
-            // if(KeyNum() == 4) 
-            // {
-            //     L4 = 0;
-            //     if(KeyNum() == 4)
-            //     {
-            //         L4 = 1;
-            //     }
-            // }
-            if(KeyNum() == 7) mode = 0;
-            break;
-        case 2:
-            LED_Show(2,2);
-            if(KeyNum() == 5) L5 = !L5;
-            if(KeyNum() == 4) L6 = !L6;
-            if(KeyNum() == 6) mode = 0;
-            break;
+        Delay(100);
+        if(S7 == 0)
+        {
+            if(mode == 0) {L1 = 0;mode = 1;}
+            else if(mode == 1) {L1 = 1;mode = 0;}
+        }
+        
+    }
+    if(S6 == 0) 
+    {
+        Delay(100);
+        if(S6 == 0)
+        {
+            if(mode == 0) {L2 = 0;mode = 2;}
+            else if(mode == 2) {L2 = 1;mode = 0;}
+        }
+        
+    }
+    if(S5 == 0)
+    {
+        Delay(100);
+        if(S5 == 0)
+        {
+            if(mode == 1) {L3 = 0;while(S5 == 0);L3 = 1;}
+            else if(mode == 2) {L5 = 0;while(S5 == 0);L5 = 1;}
+        }
+    }
+    if(S4 == 0)
+    {
+        Delay(100);
+        if(S4 == 0)
+        {
+            if(mode == 1) {L4 = 0;while(S4 == 0);L4 = 1;}
+            else if(mode == 2) {L6 = 0;while(S4 == 0);L6 = 1;}
+        }
     }
 }
 
@@ -106,7 +105,7 @@ void main()
 {
     InitSystem();
     Delay(60000);
-    LED_Show(1,0xff);
+    OutPutP0(4,0xff);
     while(1)
     {        
         LED_Ctrl();
