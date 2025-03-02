@@ -1,4 +1,5 @@
-#include <reg52.h>
+//#include <reg52.h>
+#include <STC15F2K60S2.h>
 
 sbit S7 = P3^0;
 sbit S6 = P3^1;

@@ -9,8 +9,11 @@
     "C_Cpp.errorSquiggles": "disabled",
     "files.associations": {
         "*.h": "c",
+        "*.C": "c",
+        "*.c": "c",
         "REG52.H": "c",
-        "HC138.C": "cpp"
+        "HC138.C": "cpp",
+        "STC15F2K60S2.H": "cpp"
     },
     "C_Cpp.default.compilerPath": ""
 }

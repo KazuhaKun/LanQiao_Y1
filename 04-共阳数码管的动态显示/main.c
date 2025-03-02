@@ -1,4 +1,5 @@
-#include <reg52.h>
+//#include <reg52.h>
+#include <STC15F2K60S2.h>
 
 unsigned char Month;
 
