@@ -1,5 +1,9 @@
 // #include <reg52.h>
 #include <STC15F2K60S2.h>
+
+sbit S4 = P3^3;
+sbit S5 = P3^2;
+
 //System Init
 void Delay(unsigned int t) {
     while(t--);
@@ -47,22 +51,51 @@ void InitTimer0()
 }
 
 unsigned char minSec,Sec,Min;
+unsigned char State;
+
+void Clear_Time()
+(
+    minSec = 0;
+    Sec = 0;
+    Min = 0;
+)
+
+void KeyDetect()
+{
+    if(S4 == 0)
+    {
+        Delay(100);
+        if(S4 == 0) State = !State;
+    }
+    if(S5 == 0)
+    {
+        Delay(100);
+        if(S5 == 0)
+        {
+            Clear_Time();
+            while(S5 ==0);
+        }
+    }
+}
 
 void Time()
 {
-    if(minSec == 20){minSec=0;Sec++;}
-    if(Sec == 60){Sec=0;Min++;}
-    if(Min == 100){Min = 0;}
+    if(State == 1)
+    {
+        if(minSec == 20){minSec=0;Sec++;}
+        if(Sec == 60){Sec=0;Min++;}
+        if(Min == 100){Min = 0;}
+    }
 }
 
 void TimeDisplay()
 {
     Nixie(1,1,Min/10);
     Nixie(1,2,Min%10);
-    Nixie()
+    Nixie(1,3,17);
     Nixie(1,4,Sec/10);
     Nixie(1,5,Sec%10);
-
+    Nixie(1,6,17);
     Nixie(1,7,minSec/10);
     Nixie(1,8,minSec%10);
 }
@@ -75,6 +108,8 @@ void main()
     while(1)
     {
 
+        Time();
+        TimeDisplay();
     }
 }
 
@@ -85,5 +120,6 @@ void ServiceTimer0() interrupt 1
     TH0 = (65535 - 50000) / 256;
     TL0 = (65535 - 50000) % 256;
     Count++;
-    if(Count) minSec++;
+    if(Count) {minSec++;KeyDetect();}
+    // Time();
 }
