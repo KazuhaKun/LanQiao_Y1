@@ -4,7 +4,7 @@
             "name": "Target 1",
             "includePath": [
                 "C:\\Keil_v5\\C51\\INC",
-                "d:\\Desktop\\Code\\LanQiao_Y1\\10-定时器实现秒表功能"
+                "d:\\Desktop\\Code\\LanQiao_Y1\\11-PWM"
             ],
             "defines": [
                 "__C51__",
