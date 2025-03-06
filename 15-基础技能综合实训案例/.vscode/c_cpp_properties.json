@@ -4,7 +4,7 @@
             "name": "Target 1",
             "includePath": [
                 "C:\\Keil_v5\\C51\\INC",
-                "d:\\Desktop\\Code\\LanQiao_Y1\\13-串口进阶"
+                "d:\\Desktop\\Code\\LanQiao_Y1\\14-MM"
             ],
             "defines": [
                 "__C51__",

@@ -1,4 +1,4 @@
-C51 COMPILER V9.54   MAIN                                                                  03/05/2025 19:45:24 PAGE 1   
+C51 COMPILER V9.54   MAIN                                                                  03/06/2025 20:19:36 PAGE 1   
 
 
 C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
@@ -28,68 +28,109 @@ line level    source
   18          void Disable_Buzzer(){
   19   1          OutPutP0(5,0x00);   // Disable Buzzer
   20   1      }
-  21          
-  22          unsigned char urdat;
-  23          
-  24          void InitUART()
-  25          {
-  26   1          TMOD = 0x20;
-  27   1          TH1 = 0xfd;
-  28   1          TL1 = 0xfd;
-  29   1          TR1 = 1;
-  30   1      
-  31   1          SCON = 0x50;
-  32   1          AUXR = 0x00;
-  33   1      
-  34   1          ES = 1;
-  35   1          EA = 1;
-  36   1      
-  37   1      }
-  38          
-  39          void SendByte(unsigned char dat)
-  40          {
-  41   1          SBUF = dat;
-  42   1          while(TI == 0);
-  43   1          TI = 1;
-  44   1      }
-  45          
-  46          void ServiceUART() interrupt 4
-  47          {
-  48   1          if(RI == 1)
-  49   1          {
-  50   2              RI = 0;     //人工清零
-  51   2              urdat = SBUF;
-  52   2              SendByte(urdat + 1);
-  53   2          }
-  54   1          // if(TI == 1)
-C51 COMPILER V9.54   MAIN                                                                  03/05/2025 19:45:24 PAGE 2   
+  21          void Disable_LED(){
+  22   1          OutPutP0(4,0xff);
+  23   1      }
+  24          void InitSystem(){
+  25   1          Disable_Buzzer();
+  26   1          Disable_LED();
+  27   1      }
+  28          
+  29          
+  30          unsigned char urdat;
+  31          
+  32          void SendByte(unsigned char dat);
+  33          
+  34          void InitUART()
+  35          {
+  36   1          TMOD = 0x20;
+  37   1          TH1 = 0xfd;
+  38   1          TL1 = 0xfd;
+  39   1          TR1 = 1;
+  40   1      
+  41   1          SCON = 0x50;
+  42   1          AUXR = 0x00;
+  43   1      
+  44   1          ES = 1;
+  45   1          EA = 1;
+  46   1      
+  47   1      }
+  48          unsigned char command = 0x00;
+  49          
+  50          void ServiceUART() interrupt 4
+  51          {
+  52   1          if(RI == 1)
+  53   1          {
+  54   2              RI = 0;     //人工清零
+C51 COMPILER V9.54   MAIN                                                                  03/06/2025 20:19:36 PAGE 2   
 
-  55   1          // {
-  56   1      
-  57   1          // }
-  58   1      }
-  59          
-  60          void main()
-  61          {
-  62   1          Disable_Buzzer();
-  63   1          Delay(60000);
-  64   1          OutPutP0(4,0xff);
-  65   1          InitUART();
-  66   1          SendByte(0x5a);
-  67   1          SendByte(0xa5);
-  68   1          while(1)
-  69   1          {
-  70   2      
-  71   2          }
-  72   1      }
+  55   2              command = SBUF;
+  56   2          }
+  57   1          // if(TI == 1)
+  58   1          // {
+  59   1      
+  60   1          // }
+  61   1      }
+  62          
+  63          void SendByte(unsigned char dat)
+  64          {
+  65   1          SBUF = dat;
+  66   1          while(TI == 0);
+  67   1          TI = 0;
+  68   1      }
+  69          
+  70          void SendString(unsigned char *str)
+  71          {
+  72   1          while(*str != '\0'){
+  73   2              SendByte(*str++);
+  74   2          }
+  75   1      }
+  76          
+  77          void Working()
+  78          {
+  79   1          if(command != 0x00)
+  80   1          {
+  81   2              switch(command & 0xf0)
+  82   2              {
+  83   3                  case 0xa0:
+  84   3                  P0 = (P0 & 0xf0) | ~(command & 0x0f);
+  85   3                  command = 0x00;
+  86   3                  break;
+  87   3      
+  88   3                  case 0xb0:
+  89   3                  P0 = (P0 & 0x0F) | ~((command & 0x0f) << 4);
+  90   3                  command = 0x00;
+  91   3                  break;
+  92   3      
+  93   3                  case 0xc0:
+  94   3                  SendString("The System is Running...\r\n");
+  95   3                  command = 0x00;
+  96   3                  break;
+  97   3              }
+  98   2          }
+  99   1      }
+ 100          
+ 101          void main()
+ 102          {
+ 103   1          InitSystem();
+ 104   1          Delay(60000);
+ 105   1          InitUART();
+ 106   1          SendString("Welcome to XMF System!\r\n");
+ 107   1          while(1)
+ 108   1          {
+ 109   2              Working();
+ 110   2          }
+ 111   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    131    ----
-   CONSTANT SIZE    =   ----    ----
+   CODE SIZE        =    215    ----
+   CONSTANT SIZE    =     52    ----
+C51 COMPILER V9.54   MAIN                                                                  03/06/2025 20:19:36 PAGE 3   
+
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =      1    ----
+   DATA SIZE        =      2       3
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
