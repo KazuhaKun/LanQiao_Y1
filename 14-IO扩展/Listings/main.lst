@@ -1,0 +1,87 @@
+C51 COMPILER V9.54   MAIN                                                                  03/05/2025 20:33:38 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          // #include <reg52.h>
+   2          #include <STC15F2K60S2.h>
+   3          
+   4          //System Init
+   5          void Delay(unsigned int t) {
+   6   1          while(t--);
+   7   1          while(t--);
+   8   1      }
+   9          void InitHC138(unsigned char channel) {
+  10   1          P2 = (P2 & 0x1f) | (channel << 5);
+  11   1      }
+  12          void OutPutP0(unsigned char channel,unsigned char dat){
+  13   1          InitHC138(channel);
+  14   1          P0 = dat;
+  15   1      }
+  16          void Disable_Buzzer(){
+  17   1          OutPutP0(5,0x00);   // Disable Buzzer
+  18   1      }
+  19          
+  20          void LEDRunning()
+  21          {
+  22   1          InitHC138(4);
+  23   1          P0 = 0xf0;
+  24   1          Delay(60000);
+  25   1          Delay(60000);
+  26   1          P0 = 0x0f;
+  27   1          Delay(60000);
+  28   1          Delay(60000);
+  29   1          P0 = 0xff;
+  30   1          Delay(60000);
+  31   1          Delay(60000);
+  32   1      }
+  33          
+  34          void SMGRunning()
+  35          {
+  36   1          unsigned char i;
+  37   1          for(i=0;i<8;i++)
+  38   1          {
+  39   2              InitHC138(6);
+  40   2              P0 = 0x01 << i;
+  41   2              InitHC138(7);
+  42   2              P0 = 0x00;
+  43   2              Delay(60000);
+  44   2              Delay(60000);
+  45   2          }
+  46   1          P0 = 0xff;
+  47   1          Delay(60000);
+  48   1          Delay(60000);
+  49   1      }
+  50          
+  51          void main()
+  52          {
+  53   1          Disable_Buzzer();
+  54   1          Delay(60000);
+C51 COMPILER V9.54   MAIN                                                                  03/05/2025 20:33:38 PAGE 2   
+
+  55   1          OutPutP0(4,0xff);
+  56   1          while(1)
+  57   1          {
+  58   2              LEDRunning();
+  59   2              SMGRunning();
+  60   2          }
+  61   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    158    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
