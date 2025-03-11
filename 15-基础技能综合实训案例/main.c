@@ -120,7 +120,7 @@ void SMG(unsigned char Location,unsigned char num){
     OutPutP0(6,(0x01 << Location));
     // Delay(1000);
     OutPutP0(7, SMGCode[num]);
-    Delay(100);
+    Delay(1000);
 }
 void SMGDisplay(){
     SMG(0,Hour/10);
@@ -181,7 +181,7 @@ void UARTWorking(){
     if(command != 0){
         switch(command & 0xf0){
             case 0xa0:
-            LED_State = (LED_State & 0Xf0) | ~(command & 0x0f);
+            LED_State = (LED_State & 0Xf0) | (~command & 0x0f);
             OutPutP0(4,LED_State);
             command = 0x00;
             break;
