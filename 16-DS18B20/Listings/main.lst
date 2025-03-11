@@ -1,0 +1,306 @@
+C51 COMPILER V9.54   MAIN                                                                  03/11/2025 21:00:41 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          // // #include <reg52.h>
+   2          #include <STC15F2K60S2.h>
+   3          // #include "onewire.h"
+   4          
+   5          // //Delay
+   6          // void DelaySMG(unsigned int t){
+   7          //     while(t--);
+   8          // }
+   9          
+  10          // void SMGDisplay();
+  11          // void Delay(unsigned int t){
+  12          //     while(t--) SMGDisplay();
+  13          // }
+  14          
+  15          // unsigned char SMGCode[] =
+  16          // {
+  17          // 0xc0, //0
+  18          // 0xf9, //1
+  19          // 0xa4, //2
+  20          // 0xb0, //3
+  21          // 0x99, //4
+  22          // 0x92, //5
+  23          // 0x82, //6
+  24          // 0xf8, //7
+  25          // 0x80, //8
+  26          // 0x90, //9
+  27          // 0x88, //A
+  28          // 0x83, //b
+  29          // 0xc6, //C
+  30          // 0xa1, //d
+  31          // 0x86, //E
+  32          // 0x8e, //F
+  33          // 0xBF, //-
+  34          // 0xff //None
+  35          // };
+  36          
+  37          // //System Init
+  38          // void InitHC138(unsigned char channel){
+  39          //     P2 = (P2 & 0x1f) | (channel << 5);
+  40          // }
+  41          // void OutPutP0(unsigned char channel,unsigned char dat){
+  42          //     InitHC138(channel);
+  43          //     P0 = dat;
+  44          // }
+  45          // void Disable_Buzzer(){
+  46          //     OutPutP0(5,0x00);
+  47          // }
+  48          // unsigned char LED_State = 0xff;
+  49          // void Disable_LED(){
+  50          //     OutPutP0(4,0xff);
+  51          // }
+  52          // void InitSystem(){
+  53          //     Disable_Buzzer();
+  54          //     Disable_LED();
+C51 COMPILER V9.54   MAIN                                                                  03/11/2025 21:00:41 PAGE 2   
+
+  55          // }
+  56          
+  57          // void SMG(unsigned char Location,unsigned char num){
+  58          //     OutPutP0(6,(0x01 << Location));
+  59          //     // Delay(1000);
+  60          //     OutPutP0(7, SMGCode[num]);
+  61          //     DelaySMG(1000);
+  62          // }
+  63          // void SMGDot(unsigned char Location,unsigned char num){
+  64          //     OutPutP0(6,(0x01 << Location));
+  65          //     // Delay(1000);
+  66          //     OutPutP0(7, SMGCode[num]-0x80);
+  67          //     DelaySMG(1000);
+  68          // }
+  69          // int tem;
+  70          
+  71          // void SMGDisplay(){
+  72          //     if(tem>=0){
+  73          //         SMG(4,17);
+  74          //         SMG(5,tem/100);
+  75          //         SMGDot(6,tem%100/10);
+  76          //         SMG(7,tem%10);
+  77          //     }
+  78          //     if(tem<0){
+  79          //         SMG(4,16);
+  80          //         SMG(5,-tem/100);
+  81          //         SMGDot(6,-tem%100/10);
+  82          //         SMG(7,-tem%10);
+  83          //     }
+  84          // }
+  85          
+  86          // void Read_DS18B20_Temp(){
+  87          //     unsigned char LSB,MSB;
+  88              
+  89          //     init_ds18b20();
+  90          //     Write_DS18B20(0xcc);
+  91          //     Write_DS18B20(0x44);
+  92              
+  93          //     Delay(1000);
+  94          
+  95          //     init_ds18b20();
+  96          //     Write_DS18B20(0xcc);
+  97          //     Write_DS18B20(0xbe);
+  98          //     LSB = Read_DS18B20();
+  99          //     MSB = Read_DS18B20();
+ 100          
+ 101          //     tem = MSB;
+ 102          //     tem = (tem << 8) | LSB;
+ 103          
+ 104          //     if((tem & 0xf800) == 0x0000)
+ 105          //     {
+ 106          //         tem >>= 4;
+ 107          //         tem = tem * 10;
+ 108          //         tem = tem + (LSB & 0x0f) * 0.0625;
+ 109          //     }
+ 110          // }
+ 111          
+ 112          // void main()
+ 113          // {
+ 114          //     InitSystem();
+ 115          //     DelaySMG(100);
+ 116          //     while(1)
+C51 COMPILER V9.54   MAIN                                                                  03/11/2025 21:00:41 PAGE 3   
+
+ 117          //     {
+ 118          //         Read_DS18B20_Temp();
+ 119          //         SMGDisplay();
+ 120          //     }
+ 121          // }
+ 122          
+ 123          /*==================蓝桥杯单片机特训==================
+ 124          【进阶06】DS18B20的温度采样与显示
+ 125          **硬件平台：CT107D单片机综合实训平台
+ 126          **开发环境：Keil 4
+ 127          **模    式：IO模式
+ 128          **设    计：欧浩源（小蜜蜂老师，ohy3686@qq.com）
+ 129          **时    间：2024-03-17
+ 130          **更多详见：www.yuque.com/ouhaoyuan
+ 131          ====================================================*/
+ 132          // #include "reg52.h"
+ 133          #include "onewire.h"
+ 134          
+ 135          //定义动态显示中单个数码管点亮时长
+ 136          #define TSMG  500
+ 137          //-------共阳数码管的段码编码表（无小数点）--------
+ 138          unsigned char code SMG_NoDot[18]={0xc0,0xf9,
+ 139              0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,
+ 140              0x88,0x80,0xc6,0xc0,0x86,0x8e,0xbf,0x7f};
+ 141          //-------共阳数码管的段码编码表（带小数点）--------
+ 142          //0.～9.
+ 143          unsigned char code SMG_Dot[10]={0x40,0x79,
+ 144              0x24,0x30,0x19,0x12,0x02,0x78,0x00,0x10};
+ 145          //----------------------------------------------
+ 146          
+ 147          float temp = 0;         //温度数据变量
+ 148          int num = 0;          //数码管显示变量
+ 149          void Display_Num();             //声明数码管显示函数              
+ 150          
+ 151          //==============数码管动态显示专用延时函数=============
+ 152          void DelaySMG(unsigned int t)
+ 153          {
+ 154   1        while(t--);
+ 155   1      }
+ 156          //==================设置选通的锁存器===================
+ 157          void Set_HC573(unsigned char channel, unsigned char dat)
+ 158          {
+ 159   1        P0 = dat;                      //待设置数据
+ 160   1        switch(channel)                //选通锁存器
+ 161   1        {
+ 162   2          case 4:
+ 163   2            P2 = (P2 & 0x1f) | 0x80;  //Y4输出0，LED控制
+ 164   2          break;
+ 165   2          case 5:
+ 166   2            P2 = (P2 & 0x1f) | 0xa0;  //Y5输出0，蜂鸣器和继电器控制
+ 167   2          break;
+ 168   2          case 6:
+ 169   2            P2 = (P2 & 0x1f) | 0xc0;  //Y6输出0，数码管位选
+ 170   2          break;
+ 171   2          case 7:
+ 172   2            P2 = (P2 & 0x1f) | 0xe0;  //Y7输出0，数码管段码
+ 173   2          break;
+ 174   2          case 0:
+ 175   2            P2 = (P2 & 0x1f) | 0x00;  //所有锁存器不选择
+ 176   2          break;
+ 177   2        }
+ 178   1        P2 = (P2 & 0x1f) | 0x00;      //设置完成，关闭全部锁存器
+C51 COMPILER V9.54   MAIN                                                                  03/11/2025 21:00:41 PAGE 4   
+
+ 179   1      }
+ 180          //=================单个数码管动态显示=================
+ 181          void DisplaySMG_Bit(unsigned char pos, unsigned char value)
+ 182          {
+ 183   1        Set_HC573(6, 0x01 << pos);    //数码管的段位
+ 184   1        Set_HC573(7, value);          //数码管显示内容
+ 185   1        DelaySMG(TSMG);               //数码管点亮时长
+ 186   1        Set_HC573(6, 0x01 << pos);        
+ 187   1        Set_HC573(7, 0xff);           //消隐
+ 188   1      }
+ 189          //=================全部数码管静态显示=================
+ 190          void DisplaySMG_All(unsigned char value)
+ 191          {
+ 192   1        Set_HC573(6, 0xff);       //使能所有数码管
+ 193   1        Set_HC573(7, value);      //数码管显示内容  
+ 194   1      }
+ 195          //==================计数值显示函数====================
+ 196          void Display_Num()
+ 197          {
+ 198   1        //数码管右起第3位
+ 199   1        if(num > 999)
+ 200   1        {
+ 201   2        DisplaySMG_Bit(4,SMG_NoDot[num  / 1000]);
+ 202   2        }
+ 203   1        //数码管右起第2位
+ 204   1        DisplaySMG_Bit(5,SMG_Dot[(num / 100) % 10]);   
+ 205   1        //数码管右起第1位
+ 206   1        DisplaySMG_Bit(6,SMG_NoDot[(num / 10) % 10]);
+ 207   1        //数码管右起第0位
+ 208   1        DisplaySMG_Bit(7,SMG_NoDot[num % 10]);  
+ 209   1      }
+ 210          
+ 211          //==============DS18B20温度读出与显示==============
+ 212          void Begin_18B20()
+ 213          {
+ 214   1        char i;
+ 215   1        init_ds18b20();             //初始化DS18B20
+ 216   1        Write_DS18B20(0xcc);          //忽略ROM操作
+ 217   1        Write_DS18B20(0x44);          //启动温度转换
+ 218   1        //等待第一次温度数据采集完成，不会显示默认值85.00
+ 219   1        for(i = 0; i < 8; i++)      
+ 220   1        {
+ 221   2        DelaySMG(60000);
+ 222   2        }
+ 223   1      }
+ 224          
+ 225          void Read_Dsiplay_DS18B20()
+ 226          {
+ 227   1        unsigned char LSB,MSB;      
+ 228   1        unsigned int dat = 0;      
+ 229   1        
+ 230   1        init_ds18b20();             //初始化DS18B20
+ 231   1        Display_Num();
+ 232   1        Write_DS18B20(0xcc);          //忽略ROM操作
+ 233   1        Write_DS18B20(0x44);          //启动温度转换
+ 234   1        Display_Num();
+ 235   1        init_ds18b20();             //初始化DS18B20
+ 236   1        Display_Num();
+ 237   1        Write_DS18B20(0xcc);          //忽略ROM操作
+ 238   1        Write_DS18B20(0xbe);          //读出内部存储器
+ 239   1        
+ 240   1        LSB = Read_DS18B20();       //第0字节：温度低8位
+C51 COMPILER V9.54   MAIN                                                                  03/11/2025 21:00:41 PAGE 5   
+
+ 241   1        MSB = Read_DS18B20();       //第1字节：温度高8位
+ 242   1        Display_Num();
+ 243   1        //上述程序中插入多处数码管刷新，可使显示亮度充足
+ 244   1        dat = MSB;                  
+ 245   1        dat = (dat << 8) | LSB;   //合并为16位温度原始数据
+ 246   1        //判断符号，处理正温度
+ 247   1        if((dat & 0xf800) == 0x0000)      
+ 248   1        {
+ 249   2          temp = dat * 0.0625;      //计算实际温度值
+ 250   2        }
+ 251   1        num = temp * 100;     //将2位小数部分变为整数
+ 252   1        Display_Num();              //动态刷新数码管
+ 253   1      }
+ 254          
+ 255          //=====================系统初始化=====================
+ 256          void Init_sys()
+ 257          {
+ 258   1        Set_HC573(0, 0x00);         //关闭所有锁存器
+ 259   1        Set_HC573(5, 0x00);         //关闭蜂鸣器和继电器
+ 260   1        Set_HC573(4, 0xff);         //点亮L4灯其余关闭
+ 261   1        DisplaySMG_All(0xff);       //关闭全部数码管
+ 262   1        Begin_18B20();
+ 263   1      }
+ 264          //=======================主函数=======================
+ 265          void main()
+ 266          {
+ 267   1        Init_sys();                 //系统初始化
+ 268   1        while(1)
+ 269   1        {
+ 270   2          Read_Dsiplay_DS18B20();   //采样温度数据
+ 271   2          Display_Num();            //数码管刷新
+ 272   2        }
+ 273   1      }
+ 274          //========================END========================
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    470    ----
+   CONSTANT SIZE    =     28    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      6       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
