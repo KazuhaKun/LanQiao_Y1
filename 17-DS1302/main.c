@@ -1,39 +1,15 @@
 // // #include <reg52.h>
 #include <STC15F2K60S2.h>
-#include "ds1302.h"
-
-code unsigned char WRITE_RTC_ADDR[7] = {0x80,0x82,0x84,0x86,0x88,0x8a,0x8c};
-code unsigned char READ_RTC_ADDR[7] = {0x81,0x83,0x85,0x87,0x89,0x8b,0x8d};
-//20-4-18 sat. 23:59:24
-unsigned char Timer[] = {0x24,0x59,0x23,0x18,0x04,0x06,0x20};
-
-void DS1302_Config(){
-	char i;
-	Write_Ds1302_Byte(0x8e,0x00);	//Disable WP
-	for(i=0;i<7;i++){
-		Write_Ds1302_Byte(WRITE_RTC_ADDR[i],Timer[i]);
-	}
-	Write_Ds1302_Byte(0x8e,0x80);	//Enable WP
-}
-void Read_DS1302_Timer(){
-	char i;
-	for(i=0;i<7;i++){
-		Timer[i]=Read_Ds1302_Byte(READ_RTC_ADDR[i]);
-	}
-}
-
 //Delay
 void Delay(unsigned int t){
     while(t--);
 }
-
 //System Init
 void Set_HC573(unsigned char channel,unsigned char dat){
   P2 = (P2 & 0x1f) | (channel << 5);
   P0 = dat;
 }
 unsigned char LED_State = 0xff;
-
 //SMG
 unsigned char SMGCode[] =
 {
@@ -69,19 +45,52 @@ void SMGDot(unsigned char Location,unsigned char num){
 	Set_HC573(7,0xff);
 }
 
-void KeyDetect(){
+unsigned int count_f = 0;
+unsigned int dat_f = 0;
+unsigned char count_s = 0;
 
+void Init_Timer(){
+	TMOD = 0X16;
+	TH0 = 0xff;
+	TL0 = 0xff;
+
+	TH1 = (65535-50000+1)/256;
+	TL1 = (65535-50000+1)%256;
+	ET0 = 1;
+	ET1 = 1;
+	EA = 1;
+
+	TR0 = 1;
+	TR1 = 1;
 }
 
-void Display_DS1302(){
-	SMG(0,Timer[2]/16);
-	SMG(1,Timer[2]%16);
-	SMG(2,16);
-	SMG(3,Timer[1]/16);
-	SMG(4,Timer[1]%16);
-	SMG(5,16);
-	SMG(6,Timer[0]/16);
-	SMG(7,Timer[0]%16);
+void Service_T0() interrupt 1{
+	count_f++;
+}
+
+void Service_T1() interrupt 3{
+	TH1 = (65535-50000+1)/256;
+	TL1 = (65535-50000+1)%256;
+	count_s++;
+	if(count_s == 20){
+		count_s = 0;
+		dat_f = count_f;
+		count_f = 0;
+	}
+}
+
+void Display_NE555(){
+	SMG(0,15);
+	// SMG(3,dat_f/10000);
+	// SMG(4,(dat_f%10000)/1000);
+	// SMG(5,(dat_f%1000)/100);
+	// SMG(6,(dat_f%100)/10);
+	// SMG(7,dat_f%10);
+	if(dat_f > 9999) SMG(3,dat_f/10000);
+	if(dat_f > 999) SMG(4,(dat_f%10000)/1000);
+	if(dat_f > 99) SMG(5,(dat_f%1000)/100);
+	if(dat_f > 9) SMG(6,(dat_f%100)/10);
+	SMG(7,dat_f%10);
 }
 
 void InitSystem(){
@@ -90,16 +99,15 @@ void InitSystem(){
 	Set_HC573(4,0xff);	//Disable LED
 	Set_HC573(6,0xff);
 	Set_HC573(7,0xff);	//Disable SMG
+	Init_Timer();
 }
 
 void main()
 {
     InitSystem();
     Delay(100);
-	DS1302_Config();
     while(1)
     {
-		Read_DS1302_Timer();
-		Display_DS1302();
+		Display_NE555();
     }
 }

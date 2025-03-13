@@ -1,4 +1,4 @@
-C51 COMPILER V9.54   MAIN                                                                  03/13/2025 19:40:45 PAGE 1   
+C51 COMPILER V9.54   MAIN                                                                  03/13/2025 20:46:28 PAGE 1   
 
 
 C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
@@ -10,124 +10,130 @@ line level    source
 
    1          // // #include <reg52.h>
    2          #include <STC15F2K60S2.h>
-   3          #include "ds1302.h"
-   4          
-   5          code unsigned char WRITE_RTC_ADDR[7] = {0x80,0x82,0x84,0x86,0x88,0x8a,0x8c};
-   6          code unsigned char READ_RTC_ADDR[7] = {0x81,0x83,0x85,0x87,0x89,0x8b,0x8d};
-   7          //20-4-18 sat. 23:59:24
-   8          unsigned char Timer[] = {0x24,0x59,0x23,0x18,0x04,0x06,0x20};
-   9          
-  10          void DS1302_Config(){
-  11   1        char i;
-  12   1        Write_Ds1302_Byte(0x8e,0x00); //Disable WP
-  13   1        for(i=0;i<7;i++){
-  14   2          Write_Ds1302_Byte(WRITE_RTC_ADDR[i],Timer[i]);
-  15   2        }
-  16   1        Write_Ds1302_Byte(0x8e,0x80); //Enable WP
-  17   1      }
-  18          void Read_DS1302_Timer(){
-  19   1        char i;
-  20   1        for(i=0;i<7;i++){
-  21   2          Timer[i]=Read_Ds1302_Byte(READ_RTC_ADDR[i]);
-  22   2        }
-  23   1      }
-  24          
-  25          //Delay
-  26          void Delay(unsigned int t){
-  27   1          while(t--);
-  28   1      }
-  29          
-  30          //System Init
-  31          void Set_HC573(unsigned char channel,unsigned char dat){
-  32   1        P2 = (P2 & 0x1f) | (channel << 5);
-  33   1        P0 = dat;
-  34   1      }
-  35          unsigned char LED_State = 0xff;
-  36          
-  37          //SMG
-  38          unsigned char SMGCode[] =
-  39          {
-  40          0xc0, //0
-  41          0xf9, //1
-  42          0xa4, //2
-  43          0xb0, //3
-  44          0x99, //4
-  45          0x92, //5
-  46          0x82, //6
-  47          0xf8, //7
-  48          0x80, //8
-  49          0x90, //9
-  50          0x88, //A
-  51          0x83, //b
-  52          0xc6, //C
-  53          0xa1, //d
-  54          0x86, //E
-C51 COMPILER V9.54   MAIN                                                                  03/13/2025 19:40:45 PAGE 2   
+   3          //Delay
+   4          void Delay(unsigned int t){
+   5   1          while(t--);
+   6   1      }
+   7          //System Init
+   8          void Set_HC573(unsigned char channel,unsigned char dat){
+   9   1        P2 = (P2 & 0x1f) | (channel << 5);
+  10   1        P0 = dat;
+  11   1      }
+  12          unsigned char LED_State = 0xff;
+  13          //SMG
+  14          unsigned char SMGCode[] =
+  15          {
+  16          0xc0, //0
+  17          0xf9, //1
+  18          0xa4, //2
+  19          0xb0, //3
+  20          0x99, //4
+  21          0x92, //5
+  22          0x82, //6
+  23          0xf8, //7
+  24          0x80, //8
+  25          0x90, //9
+  26          0x88, //A
+  27          0x83, //b
+  28          0xc6, //C
+  29          0xa1, //d
+  30          0x86, //E
+  31          0x8e, //F
+  32          0xBF, //-
+  33          0xff //None
+  34          };
+  35          void SMG(unsigned char Location,unsigned char num){
+  36   1          Set_HC573(6,(0x01 << Location));
+  37   1          Set_HC573(7, SMGCode[num]);
+  38   1          Delay(500);
+  39   1        Set_HC573(7,0xff);
+  40   1      }
+  41          void SMGDot(unsigned char Location,unsigned char num){
+  42   1          Set_HC573(6,(0x01 << Location));
+  43   1          Set_HC573(7, SMGCode[num]-0x80);
+  44   1          Delay(500);
+  45   1        Set_HC573(7,0xff);
+  46   1      }
+  47          
+  48          unsigned int count_f = 0;
+  49          unsigned int dat_f = 0;
+  50          unsigned char count_s = 0;
+  51          
+  52          void Init_Timer(){
+  53   1        TMOD = 0X16;
+  54   1        TH0 = 0xff;
+C51 COMPILER V9.54   MAIN                                                                  03/13/2025 20:46:28 PAGE 2   
 
-  55          0x8e, //F
-  56          0xBF, //-
-  57          0xff //None
-  58          };
-  59          void SMG(unsigned char Location,unsigned char num){
-  60   1          Set_HC573(6,(0x01 << Location));
-  61   1          Set_HC573(7, SMGCode[num]);
-  62   1          Delay(500);
-  63   1        Set_HC573(7,0xff);
-  64   1      }
-  65          void SMGDot(unsigned char Location,unsigned char num){
-  66   1          Set_HC573(6,(0x01 << Location));
-  67   1          Set_HC573(7, SMGCode[num]-0x80);
-  68   1          Delay(500);
-  69   1        Set_HC573(7,0xff);
-  70   1      }
-  71          
-  72          void KeyDetect(){
-  73   1      
-  74   1      }
-  75          
-  76          void Display_DS1302(){
-  77   1        SMG(0,Timer[2]/16);
-  78   1        SMG(1,Timer[2]%16);
-  79   1        SMG(2,16);
-  80   1        SMG(3,Timer[1]/16);
-  81   1        SMG(4,Timer[1]%16);
-  82   1        SMG(5,16);
-  83   1        SMG(6,Timer[0]/16);
-  84   1        SMG(7,Timer[0]%16);
-  85   1        Set_HC573(6,0xff);
-  86   1        Set_HC573(7,0xff);  //Disable SMG
-  87   1      }
-  88          
-  89          void InitSystem(){
-  90   1        Set_HC573(0,0x00);
-  91   1        Set_HC573(5,0x00);  //Disable Buzzer
-  92   1        Set_HC573(4,0xff);  //Disable LED
-  93   1        Set_HC573(6,0xff);
-  94   1        Set_HC573(7,0xff);  //Disable SMG
-  95   1      }
-  96          
-  97          void main()
-  98          {
-  99   1          InitSystem();
- 100   1          Delay(100);
- 101   1        DS1302_Config();
- 102   1          while(1)
- 103   1          {
- 104   2          Read_DS1302_Timer();
- 105   2          Display_DS1302();
- 106   2          }
- 107   1      }
+  55   1        TL0 = 0xff;
+  56   1      
+  57   1        TH1 = (65535-50000+1)/256;
+  58   1        TL1 = (65535-50000+1)%256;
+  59   1        ET0 = 1;
+  60   1        ET1 = 1;
+  61   1        EA = 1;
+  62   1      
+  63   1        TR0 = 1;
+  64   1        TR1 = 1;
+  65   1      }
+  66          
+  67          void Service_T0() interrupt 1{
+  68   1        count_f++;
+  69   1      }
+  70          
+  71          void Service_T1() interrupt 3{
+  72   1        TH1 = (65535-50000+1)/256;
+  73   1        TL1 = (65535-50000+1)%256;
+  74   1        count_s++;
+  75   1        if(count_s == 20){
+  76   2          count_s = 0;
+  77   2          dat_f = count_f;
+  78   2          count_f = 0;
+  79   2        }
+  80   1      }
+  81          
+  82          void Display_NE555(){
+  83   1        SMG(0,15);
+  84   1        // SMG(3,dat_f/10000);
+  85   1        // SMG(4,(dat_f%10000)/1000);
+  86   1        // SMG(5,(dat_f%1000)/100);
+  87   1        // SMG(6,(dat_f%100)/10);
+  88   1        // SMG(7,dat_f%10);
+  89   1        if(dat_f > 9999) SMG(3,dat_f/10000);
+  90   1        if(dat_f > 999) SMG(4,(dat_f%10000)/1000);
+  91   1        if(dat_f > 99) SMG(5,(dat_f%1000)/100);
+  92   1        if(dat_f > 9) SMG(6,(dat_f%100)/10);
+  93   1        SMG(7,dat_f%10);
+  94   1      }
+  95          
+  96          void InitSystem(){
+  97   1        Set_HC573(0,0x00);
+  98   1        Set_HC573(5,0x00);  //Disable Buzzer
+  99   1        Set_HC573(4,0xff);  //Disable LED
+ 100   1        Set_HC573(6,0xff);
+ 101   1        Set_HC573(7,0xff);  //Disable SMG
+ 102   1        Init_Timer();
+ 103   1      }
+ 104          
+ 105          void main()
+ 106          {
+ 107   1          InitSystem();
+ 108   1          Delay(100);
+ 109   1          while(1)
+ 110   1          {
+ 111   2          Display_NE555();
+ 112   2          }
+ 113   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    345    ----
-   CONSTANT SIZE    =     14    ----
+C51 COMPILER V9.54   MAIN                                                                  03/13/2025 20:46:28 PAGE 3   
+
+   CODE SIZE        =    407    ----
+   CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =     26       2
+   DATA SIZE        =     24    ----
    IDATA SIZE       =   ----    ----
-C51 COMPILER V9.54   MAIN                                                                  03/13/2025 19:40:45 PAGE 3   
-
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
 
