@@ -5,6 +5,7 @@
 */								
 
 //注意引脚&头文件
+#include "ds1302.h"
 
 void Write_Ds1302(unsigned  char temp) 
 {

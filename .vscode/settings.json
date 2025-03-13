@@ -13,7 +13,8 @@
         "*.c": "c",
         "REG52.H": "c",
         "HC138.C": "cpp",
-        "STC15F2K60S2.H": "cpp"
+        "STC15F2K60S2.H": "cpp",
+        "INTRINS.H": "cpp"
     },
     "C_Cpp.default.compilerPath": ""
 }
