@@ -1,0 +1,135 @@
+C51 COMPILER V9.54   MAIN                                                                  03/14/2025 20:02:54 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          // // #include <reg52.h>
+   2          #include <STC15F2K60S2.h>
+   3          #include "iic.h"
+   4          //Delay
+   5          void Delay(unsigned int t){
+   6   1          while(t--);
+   7   1      }
+   8          //System Init
+   9          void Set_HC573(unsigned char channel,unsigned char dat){
+  10   1        P2 = (P2 & 0x1f) | (channel << 5);
+  11   1        P0 = dat;
+  12   1      }
+  13          unsigned char LED_State = 0xff;
+  14          //SMG
+  15          unsigned char SMGCode[] =
+  16          {
+  17          0xc0, //0
+  18          0xf9, //1
+  19          0xa4, //2
+  20          0xb0, //3
+  21          0x99, //4
+  22          0x92, //5
+  23          0x82, //6
+  24          0xf8, //7
+  25          0x80, //8
+  26          0x90, //9
+  27          0x88, //A
+  28          0x83, //b
+  29          0xc6, //C
+  30          0xa1, //d
+  31          0x86, //E
+  32          0x8e, //F
+  33          0xBF, //-
+  34          0xff //None
+  35          };
+  36          void SMG(unsigned char Location,unsigned char num){
+  37   1          Set_HC573(6,(0x01 << Location));
+  38   1          Set_HC573(7, SMGCode[num]);
+  39   1          Delay(500);
+  40   1        Set_HC573(7,0xff);
+  41   1      }
+  42          void SMGDot(unsigned char Location,unsigned char num){
+  43   1          Set_HC573(6,(0x01 << Location));
+  44   1          Set_HC573(7, SMGCode[num]-0x80);
+  45   1          Delay(500);
+  46   1        Set_HC573(7,0xff);
+  47   1      }
+  48          unsigned char num=0;
+  49          
+  50          void Write_24C02_Byte(unsigned char addr, unsigned char dat){
+  51   1        I2CStart();   //起始信号
+  52   1        I2CSendByte(0xa0);    //设备&写地址
+  53   1        I2CWaitAck();   //等待从机应答
+  54   1        I2CSendByte(addr);    //内存地址
+C51 COMPILER V9.54   MAIN                                                                  03/14/2025 20:02:54 PAGE 2   
+
+  55   1        I2CWaitAck();   //等待从机应答
+  56   1        I2CSendByte(dat);   //写入数据
+  57   1        I2CWaitAck();   //等待从机应答
+  58   1        I2CStop();    //停止信号
+  59   1      }
+  60          
+  61          unsigned char Read_24C02_Byte(unsigned char addr){
+  62   1        unsigned char tmp;
+  63   1        //伪写操作
+  64   1        I2CStart();
+  65   1        I2CSendByte(0xa0);
+  66   1        I2CWaitAck();
+  67   1        I2CSendByte(addr);
+  68   1        I2CWaitAck();
+  69   1        //读取
+  70   1        I2CStart();
+  71   1        I2CSendByte(0xa1);
+  72   1        I2CWaitAck();
+  73   1        tmp = I2CReceiveByte();
+  74   1        I2CSendAck(1);
+  75   1        I2CStop();
+  76   1        return tmp;
+  77   1      }
+  78          
+  79          void Read_Save_OpenData(){
+  80   1        num = Read_24C02_Byte(0x00);
+  81   1        num++;
+  82   1        if(num > 99) num = 1;
+  83   1        Write_24C02_Byte(0x00,num);
+  84   1      }
+  85          
+  86          void DisplayNum(){
+  87   1        SMG(6,num/10);
+  88   1        SMG(7,num%10);
+  89   1      }
+  90          void InitSystem(){
+  91   1        Set_HC573(0,0x00);
+  92   1        Set_HC573(5,0x00);  //Disable Buzzer
+  93   1        Set_HC573(4,0xff);  //Disable LED
+  94   1        Set_HC573(6,0xff);
+  95   1        Set_HC573(7,0xff);  //Disable SMG
+  96   1      }
+  97          
+  98          void main()
+  99          {
+ 100   1          InitSystem();
+ 101   1        Read_Save_OpenData();
+ 102   1          Delay(100);
+ 103   1          while(1)
+ 104   1          {
+ 105   2          DisplayNum();
+ 106   2          }
+ 107   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    286    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     20       4
+   IDATA SIZE       =   ----    ----
+C51 COMPILER V9.54   MAIN                                                                  03/14/2025 20:02:54 PAGE 3   
+
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
