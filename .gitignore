@@ -16,4 +16,8 @@
 *.uvopt
 *.uvgui.*
 *.uvguix.*
+
+# 忽略所有项目中的Listings和Objects文件夹
+**/Listings/
+**/Objects/
 ```
